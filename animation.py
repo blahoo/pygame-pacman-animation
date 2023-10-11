@@ -1,5 +1,4 @@
 import pygame
-import threading
 
 pygame.init() 
 
@@ -35,6 +34,7 @@ food2_x = 400
 eaten2 = False 
 respawn2 = WIDTH + size*1.1
 
+running = True # play animation
 paused = False # paused
 
 # coordinate of center
@@ -53,37 +53,46 @@ def drawText(display_text, font, text_col, x, y):
 
 # print animation
 def printAnimation(text, font, start_y, start_x, text_colour):
-    for line in range(len(text)):
-    
-        y = start_y + (line*40)
-        x = start_x
+  for line in range(len(text)): # for each line in the instructions
+    y = start_y + (line*40)
+    x = start_x
 
-        output = ""
+    output = ""
 
-        for letter in text[line]:
-            screen.fill(pygame.Color("black"))
-        
-            for previous_line in range(line):  
-                previous_y = start_y + (previous_line*40)
-                drawText(text[previous_line], font, (255, 255, 255), x, previous_y)
+    for letter in text[line]: # prints each letter in a line one by one
+      screen.fill(pygame.Color("black"))
+  
+      for previous_line in range(line): # prints previous lines
+        previous_y = start_y + (previous_line*40)
+        drawText(text[previous_line], font, (255, 255, 255), x, previous_y)
 
-            output += letter
-            drawText(output, font, text_colour, x, y)
-            pygame.time.wait(50)
-            pygame.display.flip()
+      output += letter # appends new letters to the line being outputted
+      drawText(output, font, text_colour, x, y)
+
+      for event in pygame.event.get(): # allows user to skip animation or quit the program
+        if event.type == pygame.MOUSEBUTTONDOWN:
+          return True
+        elif event.type == pygame.QUIT:
+          return False
+      
+      pygame.time.wait(50)
+      pygame.display.flip()
+  
+  return True # dosen't quit the program immediately to allow pygame to end it processes by itself
+
 
 # instruction animation
 
-printAnimation(instruction_text, FONT, text_x, text_y, (255, 255, 255))
+running = printAnimation(instruction_text, FONT, text_x, text_y, (255, 255, 255))
+
 
 # main loop
-
-running = True
 
 while running:
   for event in pygame.event.get():
     if event.type == pygame.MOUSEBUTTONDOWN: # check if mouse clicked to pause or unpause
       paused = not paused
+
     elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE: # check if e key pressed to change size
       if size == 100:
         size /= 2 
